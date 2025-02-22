@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: rate-limiter
+  cache:
+    cache-names: rateLimiterRules
+
+rate-limiter:
+  cache:
+    time-to-live:
+      rate-limiter-rules: 300

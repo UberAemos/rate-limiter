@@ -1,0 +1,8 @@
+[
+  {
+    "endpoint": "api/test",
+    "method": "GET",
+    "limit": 5,
+    "window": 10
+  }
+]
