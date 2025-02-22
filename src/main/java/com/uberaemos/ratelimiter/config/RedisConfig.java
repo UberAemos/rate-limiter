@@ -5,7 +5,9 @@ import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCust
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.core.script.RedisScript;
 
 import java.time.Duration;
 
@@ -23,5 +25,10 @@ public class RedisConfig {
         return builder -> builder
                 .withCacheConfiguration(RATE_LIMITER_RULES, RedisCacheConfiguration
                         .defaultCacheConfig().entryTtl(Duration.ofSeconds(rateLimiterRulesTtl)));
+    }
+
+    @Bean
+    public RedisScript<Long> script() {
+        return RedisScript.of(new ClassPathResource("bucket.lua"), Long.class);
     }
 }

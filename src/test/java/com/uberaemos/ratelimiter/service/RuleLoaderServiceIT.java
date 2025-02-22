@@ -14,9 +14,6 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.io.IOException;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -40,18 +37,15 @@ class RuleLoaderServiceIT {
     }
 
     @Test
-    void getRules() throws IOException {
+    void getRules() {
         Cache cache = cacheManager.getCache(RedisConfig.RATE_LIMITER_RULES);
-        assertNull(cache.get("getRules"));
-        List<RateLimiterRule> rules = service.getRules();
+        assertNull(cache.get("/login"));
+        RateLimiterRule rule = service.getRule("/login");
 
-        assertNotNull(rules);
-        assertEquals(1, rules.size());
-        RateLimiterRule rateLimiterRule = rules.get(0);
-        assertEquals("api/test", rateLimiterRule.endpoint());
-        assertEquals("GET", rateLimiterRule.method());
-        assertEquals(10, rateLimiterRule.window());
-        assertEquals(5, rateLimiterRule.limit());
-        assertNotNull(cache.get("getRules"));
+        assertNotNull(rule);
+        assertEquals("/login", rule.endpoint());
+        assertEquals(5, rule.capacity());
+        assertEquals(1, rule.refillRate());
+        assertNotNull(cache.get("/login"));
     }
 }
