@@ -8,3 +8,5 @@ rate-limiter:
   cache:
     time-to-live:
       rate-limiter-rules: 300
+  rules:
+    destination: classpath:rate-limiter-rules.json

@@ -1,5 +1,7 @@
 package com.uberaemos.ratelimiter.service;
 
+import com.uberaemos.ratelimiter.exception.BusinessError;
+import com.uberaemos.ratelimiter.exception.BusinessException;
 import com.uberaemos.ratelimiter.model.RateLimiterRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +55,7 @@ public class TokenBucketRateLimiterService implements RateLimiterService {
             return result == 1;
         } catch (Exception e) {
             LOGGER.error("Rate limit check failed for client {}: {}", clientId, e.getMessage(), e);
-            throw new RuntimeException(); //TODO
+            throw new BusinessException(BusinessError.UNKNOWN_ERROR);
         }
     }
 }
