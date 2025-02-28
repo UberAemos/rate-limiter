@@ -2,6 +2,7 @@ package com.uberaemos.ratelimiter.service;
 
 import com.uberaemos.ratelimiter.exception.BusinessError;
 import com.uberaemos.ratelimiter.exception.BusinessException;
+import com.uberaemos.ratelimiter.metric.TrackLatency;
 import com.uberaemos.ratelimiter.model.RateLimiterRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,7 @@ public class TokenBucketRateLimiterService implements RateLimiterService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TokenBucketRateLimiterService.class);
 
     @Override
+    @TrackLatency(metricName = "rate_limit_check_latency_seconds")
     public boolean checkRateLimit(String clientId, String endpoint) {
         LOGGER.info("Checking rate limit for client: {}, endpoint: {}", clientId, endpoint);
 
