@@ -2,8 +2,8 @@ package com.uberaemos.ratelimiter.service;
 
 import com.uberaemos.ratelimiter.exception.BusinessError;
 import com.uberaemos.ratelimiter.exception.BusinessException;
-import com.uberaemos.ratelimiter.metric.TrackLatency;
 import com.uberaemos.ratelimiter.model.RateLimiterRule;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisOperations;
@@ -19,20 +19,21 @@ public class TokenBucketRateLimiterService implements RateLimiterService {
     private final RuleLoaderService ruleLoaderService;
     private final RedisOperations<String, String> redisOperations;
     private final RedisScript<Long> script;
+    private final RateLimiterMonitor monitor;
 
     public TokenBucketRateLimiterService(RuleLoaderService ruleLoaderService,
                                          RedisOperations<String, String> redisOperations,
-                                         RedisScript<Long> script) {
+                                         RedisScript<Long> script,
+                                         MeterRegistry meterRegistry) {
         this.ruleLoaderService = ruleLoaderService;
         this.redisOperations = redisOperations;
         this.script = script;
+        this.monitor = new RateLimiterMonitor(meterRegistry);
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TokenBucketRateLimiterService.class);
 
-    @Override
-    @TrackLatency(metricName = "rate_limit_check_latency_seconds")
-    public boolean checkRateLimit(String clientId, String endpoint) {
+    private boolean checkRateLimitHelper(String clientId, String endpoint) {
         LOGGER.info("Checking rate limit for client: {}, endpoint: {}", clientId, endpoint);
 
         RateLimiterRule rule = ruleLoaderService.getRule(endpoint);
@@ -59,5 +60,10 @@ public class TokenBucketRateLimiterService implements RateLimiterService {
             LOGGER.error("Rate limit check failed for client {}: {}", clientId, e.getMessage(), e);
             throw new BusinessException(BusinessError.UNKNOWN_ERROR);
         }
+    }
+
+    @Override
+    public boolean checkRateLimit(String clientId, String endpoint) {
+        return monitor.monitorRateLimiter(() -> checkRateLimitHelper(clientId, endpoint));
     }
 }

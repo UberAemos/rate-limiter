@@ -4,6 +4,15 @@ spring:
   cache:
     cache-names: rateLimiterRules
 
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
 rate-limiter:
   cache:
     time-to-live:
